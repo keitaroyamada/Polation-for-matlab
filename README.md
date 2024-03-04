@@ -4,8 +4,9 @@
 ---
 ## Install
 ### CUI version
-1. Download all files in this repository
-2. After unzipped, add downloaded repository to the matlab path.
+1. Install geographiclib from Matlab addon. Details is [here](https://github.com/geographiclib/geographiclib-octave).
+2. Download all files in this repository.
+3. After unzipped, add downloaded repository to the matlab path.
 
 ---
 ## Requirements (test emvironments)
