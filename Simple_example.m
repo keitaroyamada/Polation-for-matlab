@@ -13,7 +13,8 @@ pol.data = struct(...
                 "target_lon",target_data.Lon, ...
                 "target_alt",target_data.Elv);
 %show indata
-pol.plot_indata();
+%pol.plot_indata();
+pol.map_indata();%requires mapping toolbox
 
 %set calculation options
 pol.calc_opts = struct(...
@@ -21,11 +22,16 @@ pol.calc_opts = struct(...
                 "weighting_power",2,...
                 "radious",3,...
                 "radious_unit","degree", ...%["degree","kilometer"]
-                "lapse_rate",0,...%[if data is temperature, set to -0.65]
+                "lapse_rate",-0.6,...%[if data is temperature, set to -0.65]
                 "include_zeropoint",false);
+
+%check accuracy(reprojection of reference data)
+pol.reprojection();
 
 %calc
 pol.run();
 
 %show result
-pol.plot_result()
+pol.plot_result();
+pol.map_result(); %requires mapping toolbox
+

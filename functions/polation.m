@@ -28,6 +28,38 @@ classdef polation < handle
             obj.plot_opts = struct();
         end
 
+        function [] = reprojection(obj)
+            if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
+                disp("Input data is empty.")
+                return;
+            end
+
+            %store
+            backup_indata  = obj.data;
+            backup_results = obj.results;
+
+            obj.data.target_lat = obj.data.reference_lat;
+            obj.data.target_lon = obj.data.reference_lon;
+            obj.data.target_alt = obj.data.reference_alt;
+
+            obj.run();
+
+            reprojected = obj.results;
+            R = corrcoef(obj.data.reference_data, reprojected);
+
+            %show reprojected results
+            figure
+            scatter(obj.data.reference_data, reprojected)
+            title(strcat("Replojection(R=",num2str(R(1,2)),")"))
+            xlabel("Original indata")
+            ylabel("Reprojected indata")
+            grid on
+
+            %restore
+            obj.data = backup_indata;
+            obj.results = backup_results;
+        end
+
         function obj = run(obj)
             if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
                 disp("Input data is empty.")
@@ -42,8 +74,10 @@ classdef polation < handle
                 for r=1:height(obj.data.reference_lat)
                     switch obj.calc_opts.radious_unit
                         case "degree"
-                            dist(r) = sqrt((obj.data.reference_lat(r)-obj.data.target_lat(t))^2+(obj.data.reference_lon(r)-obj.data.target_lon(t))^2);
+                            dist(r) = haversine(obj.data.reference_lat(r),obj.data.reference_lon(r),obj.data.target_lat(t),obj.data.target_lon(t));
+                            %dist(r) = sqrt((obj.data.reference_lat(r)-obj.data.target_lat(t))^2+(obj.data.reference_lon(r)-obj.data.target_lon(t))^2);
                         case "kilometer"
+                            dist(r) = geoddistance(obj.data.reference_lat(r),obj.data.reference_lon(r),obj.data.target_lat(t),obj.data.target_lon(t))/1000;
                         otherwise
                             return
                     end
@@ -114,6 +148,21 @@ classdef polation < handle
             grid on
         end
 
+        function h = map_indata(obj)
+            if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
+                disp("Input data is empty.")
+                return;
+            end
+            figure
+            geoscatter(obj.data.reference_lat,obj.data.reference_lon,20,obj.data.reference_data,"filled")
+            hold on
+            geoscatter(obj.data.target_lat,obj.data.target_lon,"+red");
+            title("Input data")
+            legend("Reference","Target")
+            colorbar();
+            grid on
+        end
+
         function h = plot_result(obj)
             if isempty(obj.results)
                 disp("Result data are empty.")
@@ -124,6 +173,18 @@ classdef polation < handle
             title("Interpolated")
             xlabel("Longitude")
             ylabel("Latitude")
+            colorbar();
+            grid on
+        end
+
+        function h = map_result(obj)
+            if isempty(obj.results)
+                disp("Result data are empty.")
+                return;
+            end
+            figure
+            geoscatter(obj.data.target_lat,obj.data.target_lon,20,obj.results,"filled");
+            title("Interpolated")
             colorbar();
             grid on
         end
