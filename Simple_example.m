@@ -20,8 +20,8 @@ pol.map_indata();%requires mapping toolbox
 pol.calc_opts = struct(...
                 "method","interpolation",...%["interpolation", "nearest"]
                 "weighting_power",2,...
-                "radious",3,...
-                "radious_unit","degree", ...%["degree","kilometer"]
+                "radious",300,...
+                "radious_unit","kilometer", ...%["degree","kilometer"]
                 "lapse_rate",-0.6,...%[if data is temperature, set to -0.65]
                 "include_zeropoint",false);
 
@@ -34,4 +34,8 @@ pol.run();
 %show result
 pol.plot_result();
 pol.map_result(); %requires mapping toolbox
+
+%export
+[save_name, save_path] = uiputfile()
+pol.export(fullfile(save_path, save_name));
 

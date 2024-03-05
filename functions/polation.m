@@ -131,6 +131,13 @@ classdef polation < handle
             obj.results = output;
         end
 
+        function [] = export(obj, savepath)
+            T = [obj.data.target_lat, obj.data.target_lon, obj.data.target_alt, obj.results];
+            writetable(T, savepath);
+            disp("Exported.")
+        end
+
+
         function h = plot_indata(obj)
             if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
                 disp("Input data is empty.")
