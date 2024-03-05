@@ -29,7 +29,7 @@ pol = polation();
 ```
 
 2. Load dataset and target points
-Pass the reference data, which serves as the source for interpolation, and the target data, which represent the points of interpolation, to the instance. It is important to note that the next step cannot be executed unless both the reference and target data are inputted. The reference data and target data must be of the same length, respectively.
+Pass the reference data, which serves as the source for interpolation, and the target data, which represent the points of interpolation, to the instance. It is important to note that the next step cannot be executed unless both the reference and target data are inputted. The reference data and target data must be of the same length, respectively. The input dataset can be visually verified by using _plot_indata()_ method or _map_indata()_ method.
 
 ```
 pol.data = struct(...
@@ -46,7 +46,7 @@ pol.data = struct(...
 pol.map_indata();%requires mapping toolbox
 ```
 3. Set calculation options
-Specify the interpolation method and its options.
+Specify the interpolation method and its options. By performing the reprojection of reference points using the _reprojection()_ method, it is possible to assess the validity of the interpolation method and its parameters.
 The supported options are as follows.
 - '_method_'["interpolation"(default), "nearest"]
   Polation supports two methods.
@@ -61,7 +61,7 @@ The supported options are as follows.
 - '_radious_unit_'["degree","kilometer"(default)]
   degree: Calculate great-circular distances based on the Haversine formula.
   kilometer: Calculate distances based on Karney (2013).
-- '_lapse_rate_'[(default: 0)](/100m)
+- '_lapse_rate_'[(default: 0)]
   This is an elevation correction parameter intended for the interpolation of temperature. Specify the rate of change per 100 meters. For temperature, it is -0.65°C/100m.
 - '_include_zeropoint_'[false(default), true]
   Specify whether to include in the interpolation a reference that exists at the same location as the target point. If included, the weight of zero-point will use the average weight of other reference data.
@@ -79,6 +79,7 @@ pol.calc_opts = struct(...
 pol.reprojection();
 ```
 4. Run
+Execute the interpolation. The interpolated results can be visually verified by using _plot_result()_ method or _map_result()_ method.
 ```
 %calc
 pol.run();
@@ -88,6 +89,7 @@ pol.run();
 pol.map_result(); %requires mapping toolbox
 ```
 5. Export
+Export the interpolated results to a CSV file.
 ```
 %export
 [save_name, save_path] = uiputfile()
