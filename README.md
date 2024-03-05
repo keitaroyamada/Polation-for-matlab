@@ -3,6 +3,8 @@
 
 **Polation**は地理空間上のデータを距離の加重平均によって内挿することができるソフトウェアです。**Polation for matlab**はMatlab用にこれを再構築したものです。Polationの機能に加えて内挿距離をkmで指定可能です。
 
+<img src=https://github.com/keitaroyamada/Polation-for-matlab/blob/b0632346296582690a0d8dd8bc1af66a4fdaea6d/resources/project/polation.png width="300" >
+
 ---
 ## Install
 ### CUI version
