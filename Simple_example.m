@@ -23,10 +23,10 @@ pol.map_indata();%requires mapping toolbox
 
 %set calculation options
 pol.calc_opts = struct(...
-                "method","interpolation",...%["euclidean_degree","haversine_km","geodesic_km"]
+                "method","interpolation",...%["interpolation", "nearest"]
                 "weighting_power",2,...
                 "radious",100,...
-                "radious_unit","geodesic_km", ...%["degree","kilometer"]
+                "radious_unit","geodesic_km", ...%["euclidean_degree","haversine_km","geodesic_km"]
                 "lapse_rate",-0.65,...%[if data is temperature, set to -0.65]
                 "include_zeropoint",false);
 

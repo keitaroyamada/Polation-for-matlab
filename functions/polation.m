@@ -29,7 +29,8 @@ classdef polation < handle
             obj.plot_opts = struct();
         end
 
-        function [] = reprojection(obj)
+        function [] = reprojection(obj, varargin)
+            
             if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
                 disp("Input data is empty.")
                 return;
@@ -43,7 +44,13 @@ classdef polation < handle
             obj.data.target_lon = obj.data.reference_lon;
             obj.data.target_alt = obj.data.reference_alt;
 
-            obj.run();
+            
+            if size(varargin,2)>0
+                obj.run(varargin{1});
+            else
+               obj.run();
+            end
+
             if isempty(obj.results)
                 return;
             end
@@ -52,19 +59,27 @@ classdef polation < handle
             R = corrcoef(obj.data.reference_data, reprojected);
 
             %show reprojected results
-            figure
-            scatter(obj.data.reference_data, reprojected)
-            title(strcat("Replojection(R=",num2str(R(1,2)),")"))
-            xlabel("Original indata")
-            ylabel("Reprojected indata")
-            grid on
-
+            m0 = min([obj.data.reference_data; reprojected]);
+            m1 = max([obj.data.reference_data; reprojected]); 
+            if size(varargin,2)>1
+                ax = varargin{2};
+            else
+                figure
+                ax = gca;
+            end
+            scatter(ax, obj.data.reference_data, reprojected)
+            title(ax, strcat("Replojection(R=",num2str(R(1,2)),")"))
+            xlabel(ax, "Original indata")
+            ylabel(ax, "Reprojected indata")
+            grid(ax, 'on')
+            xlim(ax, [m0, m1])
+            ylim(ax, [m0, m1])
             %restore
             obj.data = backup_indata;
             obj.results = backup_results;
         end
 
-        function obj = run(obj)
+        function obj = run(obj, varargin)
             if isempty(obj.data.reference_lat)||isempty(obj.data.reference_lon)||isempty(obj.data.reference_data)
                 disp("Input data is empty.")
                 return;
@@ -78,10 +93,16 @@ classdef polation < handle
                 return;
             end
 
+            if size(varargin,2)>0
+                 d = uiprogressdlg(varargin{1},'Title','Please Wait','Message','Interpolating...');
+            end
             output = zeros(height(obj.data.target_lat),1);
             for t=1:height(obj.data.target_lat)
+                if size(varargin,2)>0
+                    d.Value = t/height(obj.data.target_lat);
+                end
+
                 %calc distance between points
-                
                 switch obj.calc_opts.radious_unit
                     case "euclidean_degree"
                         dist = zeros(height(obj.data.target_lat),1);
@@ -136,10 +157,10 @@ classdef polation < handle
                         
                     case "nearest"
                         if obj.calc_opts.include_zeropoint
-                            [~,idx] = min(dist, []);
+                            [~,idx] = min(dist);
                         else
                             idx1 = find(dist>0);
-                            [~,idx2] = min(dist(idx1), []);
+                            [~,idx2] = min(dist(idx1));
                             idx = idx1(idx2);
                         end
     
@@ -154,6 +175,9 @@ classdef polation < handle
                 textprogress_p(t, height(obj.data.target_lat));
             end
             obj.results = output;
+            if size(varargin,2)>0
+                close(d);
+            end
         end
 
         function [] = export(obj, savepath)
