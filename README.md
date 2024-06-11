@@ -34,14 +34,21 @@ pol = polation();
 Pass the reference data, which serves as the source for interpolation, and the target data, which represent the points of interpolation, to the instance. It is important to note that the next step cannot be executed unless both the reference and target data are inputted. The reference data and target data must be of the same length, respectively. The input dataset can be visually verified by using _plot_indata()_ method or _map_indata()_ method.
 
 ```
+%load test dataset
+load('test_temperature_dataset.mat');
+
+%remove nan values
+r_idx = find(~isnan(reference_data.temperature));
+t_idx = find(~isnan(target_data.alt));
+
 pol.data = struct(...
-                "reference_lat", [latitude array of reference dataset],...
-                "reference_lon", [longitude array of reference dataset], ...
-                "reference_alt", [altitude array of reference dataset], ...
-               "reference_data", [data array of reference dataset], ...
-                   "target_lat", [latitude array of target points],...
-                   "target_lon", [longitude array of target points], ...
-                   "target_alt", [altitude array of target points]);
+                "reference_lat",reference_data.lat(r_idx),... %latitude array of reference dataset
+                "reference_lon",reference_data.lon(r_idx), ... %longitude array of reference dataset
+                "reference_alt",reference_data.alt(r_idx), ... %altitude array of reference dataset
+                "reference_data",reference_data.temperature(r_idx), ... %data array of reference dataset
+                "target_lat",target_data.lat(t_idx),... %latitude array of target points
+                "target_lon",target_data.lon(t_idx), ... %longitude array of target points
+                "target_alt",target_data.alt(t_idx)); altitude array of target points
 
 %show input dataset
 %pol.plot_indata();%without mapping toolbox
@@ -50,7 +57,7 @@ pol.map_indata();%requires mapping toolbox
 3. Set calculation options
 Specify the interpolation method and its options. By performing the reprojection of reference points using the _reprojection()_ method, it is possible to assess the validity of the interpolation method and its parameters.
 The supported options are as follows.
-- '_**method**_' ["interpolation", "nearest"] (default: "nearest")  
+- '_**method**_' ["interpolation", "nearest"] (default: "interpolation")  
   Polation supports two methods.
   interplation: Interpolate by taking a weighted average of the reference dataset within the specified radius.
   nearest: Refer to the nearest reference data.
@@ -59,11 +66,12 @@ The supported options are as follows.
   $w$: weight, $p$: weighting power, $d$: distance between target point and data point.
   $$w = d^{-p}$$
   
-- '_**radious**_' [0 - ∞] (default: 300)  
+- '_**radious**_' [0 - ∞] (default: 100)  
   Radius to search for interpolation.
-- '_**radious_unit**_' ["degree","kilometer"] (default: "kilometer")  
-  degree: Calculate great-circular distances based on the Haversine formula.
-  kilometer: Calculate distances based on Karney (2013).
+- '_**radious_unit**_' ["euclidean_degree","haversine_km","geodesic_km"] (default: "geodesic_km")
+  euclidean_degree: Calculates Euclidean distances in degrees.
+  haversine_km: Calculates great-circular distances based on the Haversine formula.
+  geodesic_km: Calculates geodesic distances based on Karney (2013).
 - '_**lapse_rate**_' [-∞ - ∞] (default: 0)  
   This is an elevation correction parameter intended for the interpolation of temperature. Specify the rate of change per 100 meters. **For temperature, it is -0.65°C/100m**.
 - '_**include_zeropoint**_' [false, true] (default: false)  
@@ -71,12 +79,12 @@ The supported options are as follows.
   
 ```
 pol.calc_opts = struct(...
-                       "method", "interpolation",...
-              "weighting_power", 2,...
-                      "radious", 300,...
-                 "radious_unit", "kilometer", ...
-                   "lapse_rate", 0,...%[if data is temperature, set to -0.65]
-            "include_zeropoint", false);
+                "method","interpolation",... %["interpolation", "nearest"]
+                "weighting_power",2,...
+                "radious",100,...
+                "radious_unit","geodesic_km", ... %["euclidean_degree","haversine_km","geodesic_km"]
+                "lapse_rate",-0.65,... %[if data is temperature, set to -0.65]
+                "include_zeropoint",false);
 
 %check accuracy(reprojection of reference data)
 pol.reprojection();
@@ -84,7 +92,7 @@ pol.reprojection();
 4. Run
 Execute the interpolation. The interpolated results can be visually verified by using _**plot_result()**_ method or _**map_result()**_ method.
 ```
-%calc
+%calc interpolated values
 pol.run();
 
 %show result
@@ -95,7 +103,7 @@ pol.map_result(); %requires mapping toolbox
 Export the interpolated results to a CSV file.
 ```
 %export
-[save_name, save_path] = uiputfile()
+[save_name, save_path] = uiputfile('*.csv');
 pol.export(fullfile(save_path, save_name));
 ```
 
